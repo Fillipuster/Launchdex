@@ -105,14 +105,17 @@ public class MainApp extends Application {
     	txfQuery.textProperty().addListener((observable, oldValue, newValue) -> {
     		if (newValue.isEmpty()) {
     			reloadListView();
+    			lvwDestinations.setStyle("-fx-font-size: 20;");
     			return;
     		}
     		
     		lvwDestinations.getItems().removeAll(lvwDestinations.getItems());
     		if (txfQuery.getText().charAt(0) == '@') {
     			lvwDestinations.getItems().addAll(ExecutionController.everythingSearch(txfQuery.getText().substring(1, txfQuery.getText().length()), maxESResults));
+    			lvwDestinations.setStyle("");
     		} else {
         		lvwDestinations.getItems().addAll(DestinationController.orderMatch(newValue));
+        		lvwDestinations.setStyle("-fx-font-size: 20;");
     		}
     		selectFirst();
     	});
@@ -196,6 +199,7 @@ public class MainApp extends Application {
 			}
 		});
     	pane.add(lvwDestinations, 0, 1);
+    	lvwDestinations.setStyle("-fx-font-size: 20;");
     }
     
     private void frontView() {
