@@ -64,7 +64,8 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
 
         stage.setTitle("Launchdex");
-        stage.getIcons().add(new Image("https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/drop_down_list.png"));
+//        stage.getIcons().add(new Image("https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/drop_down_list.png"));
+        stage.getIcons().add(new Image("https://raw.githubusercontent.com/Fillipuster/Launchdex/master/icon.png"));
         stage.setScene(scene);
         stage.show();
         
