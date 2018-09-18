@@ -24,8 +24,6 @@ public class EditDestinationStage extends Stage {
         initOwner(owner);
         initStyle(StageStyle.DECORATED);
         initModality(Modality.APPLICATION_MODAL);
-        setMinHeight(100);
-        setMinWidth(200);
         setResizable(false);
 
         setTitle(title);
@@ -46,9 +44,11 @@ public class EditDestinationStage extends Stage {
 
     private void initContent(GridPane pane) {
     	txfName = new TextField(destination.getName());
+    	txfName.setOnAction(event -> btnEditAction());
     	pane.add(txfName, 0, 0, 2, 1);
     	
     	txfPath = new TextField(destination.getPath());
+    	txfPath.setOnAction(event -> btnEditAction());
     	pane.add(txfPath, 0, 1, 2, 1);
     	
     	btnEdit = new Button("Edit");

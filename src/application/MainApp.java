@@ -5,6 +5,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 
+import java.awt.event.InputEvent;
+
 import com.melloware.jintellitype.HotkeyListener;
 import com.melloware.jintellitype.JIntellitype;
 
@@ -16,18 +18,29 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import model.Destination;
 import storage.Storage;
 
-//@SuppressWarnings("restriction")
 public class MainApp extends Application {
 	
+	private static int maxESResults = 100;
+	
     public static void main(String[] args) throws Exception {
+    	if (args.length > 0) {
+    		try {
+    			maxESResults = Integer.parseInt(args[0]);	
+    		} catch (NumberFormatException e) {
+    			maxESResults = 100;
+    		}
+    	}
+    	
     	Storage.load();
         Application.launch(args);
     }
@@ -40,6 +53,8 @@ public class MainApp extends Application {
     public void start(final Stage stage) throws Exception {    	
     	this.stage = stage;
     	
+    	Platform.setImplicitExit(false);
+    	
     	GridPane root = new GridPane();
     	root.setPadding(new Insets(10d));
     	root.setHgap(10d);
@@ -49,17 +64,30 @@ public class MainApp extends Application {
         Scene scene = new Scene(root);
 
         stage.setTitle("Launchdex");
+        stage.getIcons().add(new Image("https://d1nhio0ox7pgb.cloudfront.net/_img/o_collection_png/green_dark_grey/256x256/plain/drop_down_list.png"));
         stage.setScene(scene);
         stage.show();
+        
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				backView();
+				event.consume();
+			}
+		});
         
         // Hotkey Related
         JIntellitype.getInstance().addHotKeyListener(new HotkeyListener() {
 			public void onHotKey(int identifier) {
-				frontView();
+				if (stage.isShowing()) {
+					backView();
+				} else {
+					frontView();	
+				}
 			}
 		});
-        
-        JIntellitype.getInstance().registerHotKey(1, JIntellitype.MOD_ALT + JIntellitype.MOD_SHIFT, (int)'Z');
+         
+        JIntellitype.getInstance().registerSwingHotKey(1, InputEvent.ALT_MASK, java.awt.event.KeyEvent.VK_SPACE);
     }
     
     private TextField txfQuery;
@@ -81,26 +109,39 @@ public class MainApp extends Application {
     		
     		lvwDestinations.getItems().removeAll(lvwDestinations.getItems());
     		if (txfQuery.getText().charAt(0) == '@') {
-    			lvwDestinations.getItems().addAll(ExecutionController.everythingSearch(txfQuery.getText().substring(1, txfQuery.getText().length())));
+    			lvwDestinations.getItems().addAll(ExecutionController.everythingSearch(txfQuery.getText().substring(1, txfQuery.getText().length()), maxESResults));
     		} else {
         		lvwDestinations.getItems().addAll(DestinationController.orderMatch(newValue));
     		}
-    		if (lvwDestinations.getItems().size() > 0) {
-    			lvwDestinations.getSelectionModel().select(lvwDestinations.getItems().get(0));	
-    		}
+    		selectFirst();
     	});
     	txfQuery.setOnAction(event -> txfAction());
+    	txfQuery.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.DOWN) {
+					lvwDestinations.requestFocus();
+					selectFirst();
+				}
+			}
+		});
     	pane.add(txfQuery, 0, 0);
     }
     
     private void buildListView(GridPane pane) {
     	lvwDestinations = new ListView<>();
     	lvwDestinations.getItems().addAll(Storage.getDestinations());
+    	selectFirst();
     	lvwDestinations.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode().equals(KeyCode.ENTER) && !lvwDestinations.getSelectionModel().isEmpty()) {
 					ExecutionController.execDestination(lvwDestinations.getSelectionModel().getSelectedItem());
+					backView();
+				}
+				
+				if (event.getCode().equals(KeyCode.UP) && lvwDestinations.getSelectionModel().getSelectedIndex() == 0) {
+					txfQuery.requestFocus(); 
 				}
 			}
 		});
@@ -141,10 +182,11 @@ public class MainApp extends Application {
 					@Override
 					public void handle(ActionEvent event) {
 						Storage.removeDestination(lvwDestinations.getSelectionModel().getSelectedItem());
+						reloadListView();
 					}
 				});
 				
-				if (txfQuery.getText().charAt(0) == '@') {
+				if (!txfQuery.getText().isEmpty() && txfQuery.getText().charAt(0) == '@') {
 					cm.getItems().addAll(pathItem, addItem);
 				} else {
 					cm.getItems().addAll(pathItem, editItem, removeItem);	
@@ -156,13 +198,13 @@ public class MainApp extends Application {
     }
     
     private void frontView() {
-    	System.out.println("Fronting view...");
     	Platform.runLater(new Runnable() {
     		@Override
 			public void run() {
-				stage.setIconified(false);
-				stage.toFront();
-				
+    			stage.show();
+//				stage.setIconified(false);
+//				stage.toFront();
+    			
 				txfQuery.requestFocus();
 				txfQuery.selectAll();
 			}
@@ -170,12 +212,12 @@ public class MainApp extends Application {
     }
     
     private void backView() {
-    	System.out.println("Backing view...");
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				stage.toBack();
-				stage.setIconified(true);
+				stage.hide();
+//				stage.toBack();
+//				stage.setIconified(true);
 			}
 		});
     }
@@ -188,6 +230,12 @@ public class MainApp extends Application {
     private void reloadListView() {
     	lvwDestinations.getItems().removeAll(lvwDestinations.getItems());
     	lvwDestinations.getItems().addAll(Storage.getDestinations());
+    }
+    
+    private void selectFirst() {
+    	if (lvwDestinations.getItems().size() > 0) {
+    		lvwDestinations.getSelectionModel().select(0);
+    	}
     }
 
 }

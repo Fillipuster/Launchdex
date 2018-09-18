@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Firefox",
+    "path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+  },
+  {
+    "name": "Discord",
+    "path": "C:\\ProgramData\\SquirrelMachineInstalls\\Discord.exe"
+  },
+  {
+    "name": "Facebook Messenger",
+    "path": "C:\\Users\\Fillipuster\\AppData\\Local\\messengerfordesktop\\Update.exe"
+  }
+]

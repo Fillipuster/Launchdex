@@ -24,8 +24,6 @@ public class AddDestinationStage extends Stage {
         initOwner(owner);
         initStyle(StageStyle.DECORATED);
         initModality(Modality.APPLICATION_MODAL);
-        setMinHeight(100);
-        setMinWidth(200);
         setResizable(false);
 
         setTitle(title);
@@ -46,9 +44,11 @@ public class AddDestinationStage extends Stage {
 
     private void initContent(GridPane pane) {
     	txfName = new TextField("Name");
+    	txfName.setOnAction(event -> btnAddAction());
     	pane.add(txfName, 0, 0, 2, 1);
     	
     	txfPath = new TextField(path);
+    	txfPath.setOnAction(event -> btnAddAction());
     	pane.add(txfPath, 0, 1, 2, 1);
     	
     	btnAdd = new Button("Add");

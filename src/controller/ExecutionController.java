@@ -28,16 +28,16 @@ public class ExecutionController {
 		}
 	}
 	
-	public static ArrayList<Destination> everythingSearch(String query) {
+	public static ArrayList<Destination> everythingSearch(String query, int maxResults) {
 		ArrayList<Destination> result = new ArrayList<>();
 		
-		if (query.length() <= 3) {
-			result.add(new Destination("Search query too short...", "Search query too short..."));
-			return result;
-		}
+//		if (query.length() <= 3) {
+//			result.add(new Destination("Search query too short...", "Search query too short..."));
+//			return result;
+//		}
 		
 		try {
-			ArrayList<String> queryResult = (ArrayList<String>) IOUtils.readLines(exec("es", query), "UTF-8");
+			ArrayList<String> queryResult = (ArrayList<String>) IOUtils.readLines(exec("es", "-n", Integer.toString(maxResults), query), "UTF-8");
 			for (String s : queryResult) {
 				result.add(new Destination(s, s));
 			}
